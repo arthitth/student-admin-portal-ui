@@ -1,10 +1,11 @@
 import { StudentService } from './../student.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Student } from 'src/app/models/ui-models/student.model';
 import { GenderService } from 'src/app/services/gender.service';
 import { Gender } from 'src/app/models/ui-models/gender.model';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { NgForm } from '@angular/forms';
 
 @Component({
   selector: 'app-view-student',
@@ -36,6 +37,7 @@ export class ViewStudentComponent implements OnInit {
   header = '';
   displayProfileImageUrl = '';
   genderList: Gender[] = [];
+  @ViewChild('studentDetailsForm') studentDetailsForm?: NgForm;
 
   constructor(
     private readonly studentService: StudentService,
@@ -79,19 +81,24 @@ export class ViewStudentComponent implements OnInit {
     });
   }
   onUpdate(): void {
-    // console.log(this.student)
-    this.studentService.updateStudent(this.student.id, this.student).subscribe(
-      (successResponse) => {
-        console.log(successResponse);
-        // Show a notification
-        this.snackbar.open('Student updated successfully', undefined, {
-          duration: 2000,
-        });
-      },
-      (errorResponse) => {
-        // Log it
-      }
-    );
+    if (this.studentDetailsForm?.form.valid) {
+      // console.log(this.student)
+      this.studentService
+        .updateStudent(this.student.id, this.student)
+        .subscribe(
+          (successResponse) => {
+            console.log(successResponse);
+            // Show a notification
+            this.snackbar.open('Student updated successfully', undefined, {
+              duration: 2000,
+            });
+          },
+          (errorResponse) => {
+            // Log it
+            console.log(errorResponse);
+          }
+        );
+    }
   }
 
   onDelete(): void {
@@ -113,49 +120,49 @@ export class ViewStudentComponent implements OnInit {
   }
 
   onAdd(): void {
-    this.studentService.addStudent(this.student).subscribe(
-      (successResponse) => {
-        // console.log(this.student)
-        this.snackbar.open('Student added successfully', undefined, {
-          duration: 2000,
-        });
+    if (this.studentDetailsForm?.form.valid) {
+      // Submit form date to api
+      this.studentService.addStudent(this.student).subscribe(
+        (successResponse) => {
+          this.snackbar.open('Student added successfully', undefined, {
+            duration: 2000,
+          });
 
-        setTimeout(() => {
-          this.router.navigateByUrl(`students/${successResponse.id}`);
-        }, 2000);
-      },
-      (errorResponse) => {
-        // Log
-      }
-    );
+          setTimeout(() => {
+            this.router.navigateByUrl(`students/${successResponse.id}`);
+          }, 2000);
+        },
+        (errorResponse) => {
+          // Log
+          console.log(errorResponse);
+        }
+      );
+    }
   }
 
   uploadImage(event: any): void {
     if (this.studentId) {
       const file: File = event.target.files[0];
-      this.studentService.uploadImage(this.student.id, file)
-        .subscribe(
-          (successResponse) => {
-            this.student.profileImageUrl = successResponse;
-            this.setImage();
+      this.studentService.uploadImage(this.student.id, file).subscribe(
+        (successResponse) => {
+          this.student.profileImageUrl = successResponse;
+          this.setImage();
 
-            // Show a notification
-            this.snackbar.open('Profile Image Updated', undefined, {
-              duration: 2000
-            });
-
-          },
-          (errorResponse) => {
-
-          }
-        );
-
+          // Show a notification
+          this.snackbar.open('Profile Image Updated', undefined, {
+            duration: 2000,
+          });
+        },
+        (errorResponse) => {}
+      );
     }
   }
 
   private setImage(): void {
     if (this.student.profileImageUrl) {
-      this.displayProfileImageUrl = this.studentService.getImagePath(this.student.profileImageUrl);
+      this.displayProfileImageUrl = this.studentService.getImagePath(
+        this.student.profileImageUrl
+      );
     } else {
       // Display a default
       this.displayProfileImageUrl = '/assets/user.png';
