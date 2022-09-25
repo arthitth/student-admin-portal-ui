@@ -51,13 +51,19 @@ import { StudentsComponent } from './students/students.component';
 import { HttpClientModule } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { ViewStudentComponent } from './students/view-student/view-student.component';
+import { MaterialComponent } from './material/material.component';
+import { SignupComponent } from './signup/signup.component';
+import { TrainingComponent } from './training/training.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     TopNavComponent,
     StudentsComponent,
-    ViewStudentComponent
+    ViewStudentComponent,
+    MaterialComponent,
+    SignupComponent,
+    TrainingComponent
   ],
   imports: [
     FormsModule,
